@@ -1,0 +1,18 @@
+{
+   "name":			"快速查询工具",
+   "main":			"./start.js",
+   "version":		"0.0.1",
+   "author": "leizongmin <leizongmin@gmail.com> (http://query.cnodejs.net)",
+   "repository": {
+		"type": "git",
+		"url": "git://github.com/leizongmin/query-tool.git"
+	},
+	"engines": {
+		"node": ">= 0.4.1"
+	},
+	"dependencies":	{
+		"QuickWeb":		">=0.1.8",
+		"mustache":		"*",
+		"mongoskin":	"*"
+	}
+} 
