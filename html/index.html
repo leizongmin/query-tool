@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>快速查询工具</title>
+<meta charset="utf-8" />
+<script src="http://lib.sinaapp.com/js/jquery/1.6.2/jquery.min.js"></script>
+<script src="/md5.js"></script>
+<style>
+#login {
+	width: 300px;
+	margin: auto;
+	padding-top: 100px;
+}
+.textfield {
+	font-size: 16px;
+	color: #616161;
+	font-weight: bold;
+}
+.textbox {
+	border: 1px solid #4CC2FF;
+	padding: 4px;
+	font-size: 16px;
+	color: #616161;
+	font-weight: bold;
+	font-style: italic;
+	width: 200px;
+}
+.button {
+	padding: 4px 20px;
+	font-size: 16px;
+	font-weight: bold;
+	background-color: #005AC0;
+	border: none;
+	border-radius: 8px;
+	color: white;
+	margin: 8px 100px;
+}
+.button:hover {
+	box-shadow: 0px 0px 20px #005AC0;
+}
+#main {
+	width: 800px;
+	margin: auto;
+	display: none;
+}
+#template {
+	float: left;
+	width: 280px;
+}
+#editor {
+	float: right;
+	width: 500px;
+	font-size: 12px;
+}
+.template-item {
+	padding: 4px;
+	box-shadow: 0px 0px 2px #C0C0C0;
+}
+.t-title {
+	font-size: 16px;
+	font-weight: bold;
+	color: #007803;
+}
+.t-op {
+	float: right;
+	width: 60px;
+	font-size: 12px;
+	cursor: pointer;
+}
+#e-title, #e-url, #e-get, #e-post, #e-auto {
+	border: 1px solid #4CC2FF;
+	padding: 4px;
+	width: 95%;
+	font-size: 14px;
+}
+#e-get, #e-post {
+	height: 60px;
+}
+</style>
+</head>
+<body>
+<!-- 登录框 -->
+<div id="login">
+	<span class="textfield">邮箱：</span>
+	<input id="username" class="textbox" type="text" />
+	<br>
+	<span class="textfield">密码：</span>
+	<input id="password" class="textbox" type="password" />
+	<br>
+	<button onclick="enter()" class="button">管理</button>
+</div>
+
+<!-- 管理框 -->
+<div id="main">
+	<!-- 模板列表 -->
+	<div id="template">
+		<div class="template-item">
+			<span class="t-title"><a href="#">百度搜索</a></span>
+			<div class="t-op">
+				<a href="">编辑</a>
+				<a href="">删除</a>
+			</div>
+		</div>
+		<div class="template-item">
+			<span class="t-title"><a href="#">百度搜索</a></span>
+			<div class="t-op">
+				<a href="">编辑</a>
+				<a href="">删除</a>
+			</div>
+		</div>
+	</div>
+	<!-- 编辑框 -->
+	<div id="editor">
+		<input id="e-id" type="hidden" />
+		<table align="center" width="400">
+			<tr>
+				<td width="140">模板名称：</td>
+				<td><input id="e-title" type="text"/></td>
+			</tr>
+			<tr>
+				<td>网址：</td>
+				<td><input id="e-url" type="text"/></td>
+			</tr>
+			<tr>
+				<td colspan="2">GET参数：(每行一个，格式为：“参数名 参数描述 默认值”)</td>
+			</tr>
+			<tr>
+				<td colspan="2"><textarea id="e-get"></textarea></td>
+			</tr>
+			<tr>
+				<td colspan="2">POST参数：(每行一个，格式为：“参数名 参数描述 默认值”)</td>
+			</tr>
+			<tr>
+				<td colspan="2"><textarea id="e-post"></textarea></td>
+			</tr>
+			<tr>
+				<td>自动填写的参数名：</td>
+				<td><input id="e-auto" type="text" /></td>
+			</tr>
+			<tr>
+				<td colspan="2"><input id="e-window" type="checkbox" />打开新窗口查询</td>
+			</tr>
+			<tr>
+				<td><button onclick="submit()">保存</button></td>
+				<td><button onclick="newTemplate()">新建</button></td>
+			</tr>
+		</table>
+	</div>
+</div>
+</body>
+</html>
+<script>
+var enter = function () {
+	var username = $('#username').val().trim();
+	var password = $('#password').val().trim();
+	var token = hex_md5(username + ':' + password).toLowerCase();
+	$('#login').hide();
+	window.token = token;
+	getTemplateList(token);
+	$('#main').slideDown();
+}
+// 获取模板列表
+var getTemplateList = function (token) {
+	$.getJSON('/u/' + token, function (d) {
+		if (d instanceof Array && d.length > 0) {
+			var html = '';
+			d.forEach(function (v) {
+			
+				var a = "javascript: (function(){ var s=document.createElement('scr'+'ipt'); s.charset='UTF-8'; s.src='http://" + window.location.host + "/load/" + v.id + "'; document.body.appendChild(s); })();";
+				
+				html += '<div class="template-item">' +
+						'<span class="t-title"><a href="' + a + '">' + v.title + '</a></span>' +
+						'<div class="t-op">' +
+						'<a onclick="editTemplate(\'' + v.id + '\')">编辑</a> ' +
+						'<a onclick="removeTemplate(\'' + v.id + '\')">删除</a>' +
+						'</div></div>';
+			});
+		}
+		else {
+			var html = '没有查询模板';
+		}
+		$('#template').html(html);
+	});
+}
+// 编辑模板
+var editTemplate = function (id) {
+	$.getJSON('/t/' + id, function (d) {
+		if (typeof d == 'object') {
+			$('#e-title').val(d.title);
+			$('#e-url').val(d.url);
+			$('#e-auto').val(d.auto);
+			$('#e-window').attr('checked', d.window);	
+			$('#e-id').val(d.id);
+			$('#e-get').val(paramsDecode(d.get));
+			$('#e-post').val(paramsDecode(d.post));
+		}
+	});
+}
+// 保存
+var submit = function () {
+	var id = $('#e-id').val().trim();
+	if (id != '')
+		var action = '/t/' + id;
+	else
+		var action = '/u/' + window.token;
+	var data = {
+		title:	$('#e-title').val().trim(),
+		url:	$('#e-url').val().trim(),
+		auto:	$('#e-auto').val().trim(),
+		get:	$('#e-get').val().trim(),
+		post:	$('#e-post').val().trim(),
+		window:	$('#e-window').attr('checked') ? 'on' : ''
+	}
+	$.post(action, data, function (d) {
+		getTemplateList(window.token);
+		alert('保存' + (d ? '成功' : '失败'));
+		if (id == '')
+			newTemplate();
+	}, 'json');
+}
+// 新建
+var newTemplate = function () {
+	$('#e-id').val('');
+	$('#e-title').val('');
+	$('#e-url').val('');
+	$('#e-auto').val('');
+	$('#e-get').val('');
+	$('#e-post').val('');
+	$('#e-window').attr('checked', false);
+}
+// 删除
+var removeTemplate = function (id) {
+	$.ajax({
+		url:	'/t/' + id,
+		type:	'DELETE',
+		dataType:	'json',
+		success: function (d) {
+			getTemplateList(window.token);
+			alert('删除' + (d ? '成功' : '失败'));
+		}
+	});
+}
+
+paramsDecode = function (obj) {
+	var ret = '';
+	for (var i in obj) {
+		var line = i;
+		for (var j = 0, p; p = obj[i][j]; j++) {
+			line += ' ' + p;
+		}
+		ret += line + '\n';
+	}
+	return ret;
+}
+</script>

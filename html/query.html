@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>快速查询</title>
+<meta charset="utf-8" />
+<script src="http://lib.sinaapp.com/js/jquery/1.6.2/jquery.min.js"></script>
+<script src="/md5.js"></script>
+<style>
+.title {
+	font-size: 16px;
+	font-weight: bold;
+	color: #007803;
+}
+input[type=text] {
+	width: 95%;
+	padding: 4px;
+	border: 1px solid #4CC2FF;
+	font-size: 16px;
+	color: #616161;
+	font-weight: bold;
+}
+input[type=submit] {
+	padding: 4px 20px;
+	font-size: 16px;
+	font-weight: bold;
+	background-color: #005AC0;
+	border: none;
+	border-radius: 8px;
+	color: white;
+	margin: 8px 100px;
+}
+input[type=submit]:hover {
+	box-shadow: 0px 0px 20px #005AC0;
+}
+</style>
+</head>
+<body>
+<h2>{{title}}</h2>
+<form action="{{url}}" method="{{method}}" target="{{window}}">
+<table width="400" align="center">
+	{{#field}}
+	<tr>
+		<td width="100" class="title">{{text}}</td>
+		<td><input name="{{name}}" type="text" value="{{value}}"></td>
+	</tr>
+	{{/field}}
+	<tr>
+		<td colspan="2" align="center"><input type="submit"></td>
+	</tr>
+</table>
+</form>
+</body>
+</html>
+<script>
+{{init}}
+</script>
